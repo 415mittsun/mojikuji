@@ -6,22 +6,20 @@ from flask import Flask
 from threading import Thread
 import logging
 
-# ログを詳しく出す設定
+# ログを詳細に出力
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask('')
 @app.route('/')
 def home():
     return "Bot is running!"
 
-def run():
+def run_flask():
+    # ポート8080でWebサーバーを起動
     app.run(host='0.0.0.0', port=8080)
 
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
-
-# インテントを「全部許可」にする
+# インテント設定
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -29,7 +27,6 @@ HIRAGANA = "あいうえおかきくけこさしすせそたちつてとなに�
 
 @bot.event
 async def on_ready():
-    # 起動に成功したら必ずこれが出る
     print("---------------------------------------")
     print(f'成功！ Discordにログインしました: {bot.user.name}')
     print("---------------------------------------")
@@ -39,7 +36,6 @@ async def on_message(message):
     if message.author == bot.user:
         return
     
-    # メッセージを受け取ったら必ずこれが出る
     print(f"メッセージ受信: {message.content} (ID: {message.channel.id})")
 
     TARGET_CHANNEL_ID = 1456153594968543325 
@@ -49,16 +45,16 @@ async def on_message(message):
             result = "".join(random.choice(HIRAGANA) for _ in range(length))
             await message.channel.send(f"結果：{result}")
 
-# 実行開始のログ
-print("プログラムを開始します...")
-keep_alive()
+if __name__ == "__main__":
+    # 1. 先にWebサーバーを別スレッドで開始
+    print("Webサーバーを起動中...")
+    t = Thread(target=run_flask)
+    t.start()
 
-token = os.getenv('DISCORD_TOKEN')
-if token is None:
-    print("エラー: DISCORD_TOKEN が設定されていません！")
-else:
-    print(f"トークンを読み込みました (先頭3文字: {token[:3]}...)")
-    try:
+    # 2. メインスレッドでBotを起動
+    token = os.getenv('DISCORD_TOKEN')
+    if token:
+        print(f"トークンを確認しました。Discordへ接続します...")
         bot.run(token)
-    except Exception as e:
-        print(f"致命的なエラーが発生しました: {e}")
+    else:
+        print("エラー: DISCORD_TOKEN が見つかりません。")
