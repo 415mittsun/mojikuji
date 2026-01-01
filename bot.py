@@ -38,8 +38,8 @@ async def on_message(message):
     TARGET_CHANNEL_ID = 1456153594968543325 
 
     if message.channel.id == TARGET_CHANNEL_ID:
-        # ※カスタム絵文字にする場合は、ここを "<:名前:ID>" に書き換えてください
-        if message.content == "😀":
+        # 完全一致ではなく「😀」が含まれているかどうかで判定
+        if "😀" in message.content:
             length = random.randint(2, 6)
             result = "".join(random.choice(HIRAGANA) for _ in range(length))
             await message.channel.send(f"結果：{result}")
@@ -51,3 +51,4 @@ keep_alive() # 生存確認用サーバーを起動
 # RenderのEnvironmentで設定した「DISCORD_TOKEN」を読み込む
 token = os.getenv('DISCORD_TOKEN')
 bot.run(token)
+
