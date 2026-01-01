@@ -1,13 +1,29 @@
 import discord
 from discord.ext import commands
 import random
+import os
+from flask import Flask
+from threading import Thread
 
-# Botの基本設定
+# --- 1. 24時間稼働（スリープ防止）用の設定 ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+# ------------------------------------------
+
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# 使用するひらがなのリスト
 HIRAGANA = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
 
 @bot.event
@@ -19,11 +35,10 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    # ★特定のチャンネルIDを指定（例: 123456789012345678）
-    # 整数（int型）として比較します
     TARGET_CHANNEL_ID = 1456153594968543325 
 
     if message.channel.id == TARGET_CHANNEL_ID:
+        # ※カスタム絵文字にする場合は、ここを "<:名前:ID>" に書き換えてください
         if message.content == "😀":
             length = random.randint(2, 6)
             result = "".join(random.choice(HIRAGANA) for _ in range(length))
@@ -31,5 +46,8 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-# ここに先ほどメモしたトークンを貼り付ける
-bot.run('YOUR_BOT_TOKEN_HERE')
+# 実行
+keep_alive() # 生存確認用サーバーを起動
+# RenderのEnvironmentで設定した「DISCORD_TOKEN」を読み込む
+token = os.getenv('DISCORD_TOKEN')
+bot.run(token)
