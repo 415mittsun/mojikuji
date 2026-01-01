@@ -30,7 +30,7 @@ HIRAGANA = "あいうえおかきくけこさしすせそたちつてとなに�
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
 
-@@bot.event
+@bot.event
 async def on_message(message):
     # Bot自身のメッセージには反応しない
     if message.author == bot.user:
@@ -59,5 +59,6 @@ keep_alive() # 生存確認用サーバーを起動
 # RenderのEnvironmentで設定した「DISCORD_TOKEN」を読み込む
 token = os.getenv('DISCORD_TOKEN')
 bot.run(token)
+
 
 
